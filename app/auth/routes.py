@@ -3,6 +3,8 @@ from app.models.user import User
 from app.extensions import db
 from sqlalchemy.exc import IntegrityError
 from app.auth.validators import validate_username, validate_email, validate_password
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies
+from flask import jsonify
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -66,3 +68,57 @@ def register():
         }
     }, 201
 
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {'error': 'Invalid request body'}, 400
+
+
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return {'error': 'All fields are required'}, 400
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        return {'error': 'Invalid username or password'}, 401
+
+    if not user.verify_password(password):
+        return {'error': 'Invalid password'}, 401
+
+    access_token = create_access_token(identity=str(user.id))
+
+
+    response = jsonify({
+        'message': 'login successful',
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email
+        }
+    })
+
+    set_access_cookies(response, access_token)
+
+    return response, 200
+
+
+@auth_bp.route('/profile', methods=['GET'])
+@jwt_required()
+def profile():
+    current_user_id = get_jwt_identity()
+
+    user = db.session.get(User, int(current_user_id))
+
+    if not user:
+        return {'error': 'User not found'}, 404
+
+    return {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email
+    }, 200
