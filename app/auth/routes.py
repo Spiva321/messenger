@@ -13,10 +13,10 @@ def test_auth():
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
-    if not data:
-        return {'error': 'Request body must contain JSON'}, 400
+    if not isinstance(data, dict):
+        return {'error': 'Invalid request body'}, 400
 
     username = data.get('username')
     email = data.get('email')
@@ -34,7 +34,7 @@ def register():
     errors = {field: error for field, error in errors.items() if error}
 
     if errors:
-        return errors, 400
+        return {'errors': errors}, 400
 
     existing_user = User.query.filter(
         (User.username == username) | (User.email == email)
@@ -55,7 +55,7 @@ def register():
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        return {'error': 'USERNAME OR EMAIL ALREADY EXISTS'}
+        return {'error': 'Username or email already exists'}, 409
 
     return {
         'message': 'user registered successfully',
