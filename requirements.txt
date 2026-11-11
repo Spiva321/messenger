@@ -5,4 +5,4 @@ Flask-JWT-Extended
 psycopg2-binary
 argon2-cffi
 python-dotenv
-argon2
+email-validator
