@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from app.models.user import User
 from app.extensions import db
 from sqlalchemy.exc import IntegrityError
+from app.auth.validators import validate_username, validate_email, validate_password
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -23,6 +24,17 @@ def register():
 
     if not username or not email or not password:
         return {'error': 'All fields are required'}, 400
+
+    errors = {
+        'username': validate_username(username),
+        'email': validate_email(email),
+        'password': validate_password(password)
+    }
+
+    errors = {field: error for field, error in errors.items() if error}
+
+    if errors:
+        return errors, 400
 
     existing_user = User.query.filter(
         (User.username == username) | (User.email == email)
