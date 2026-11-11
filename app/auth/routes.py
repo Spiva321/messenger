@@ -3,7 +3,7 @@ from app.models.user import User
 from app.extensions import db
 from sqlalchemy.exc import IntegrityError
 from app.auth.validators import validate_username, validate_email, validate_password
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, set_access_cookies, unset_jwt_cookies
 from flask import jsonify
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -122,3 +122,16 @@ def profile():
         'username': user.username,
         'email': user.email
     }, 200
+
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    response = jsonify({
+        'message': 'logout successful'
+    })
+
+    unset_jwt_cookies(response)
+
+    return response, 200
+
+

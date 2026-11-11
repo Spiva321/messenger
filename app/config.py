@@ -13,6 +13,10 @@ class Config:
     JWT_TOKEN_LOCATION = ['cookies']
     JWT_COOKIE_SECURE = False
 
+    JWT_COOKIE_CSRF_PROTECT = True
+    JWT_CSRF_IN_COOKIES = True
+    JWT_CSRF_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
+
     DEBUG = False
     TESTING = False
 
