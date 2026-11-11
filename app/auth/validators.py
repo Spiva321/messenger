@@ -22,7 +22,7 @@ def validate_username(username):
     if len(username) < 3 or len(username) > 20:
         return 'Username must be between 3 and 20 characters'
 
-    if not re.fullmatch('^[a-zA-Z0-9_-]+$', username):
+    if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_.]*', username):
         return 'Invalid username'
 
     return None

@@ -2,7 +2,6 @@ from flask import Blueprint, request
 from app.models.user import User
 from app.extensions import db
 from sqlalchemy.exc import IntegrityError
-from email_validator import validate_email, EmailNotValidError
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
